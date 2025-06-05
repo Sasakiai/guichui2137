@@ -1,14 +1,21 @@
-import view.MainMenuWindow;
+/**
+ * Launches the Pac-Man game.
+ */
 import controller.MainMenuController;
-import javax.swing.*;
+import view.MainMenuWindow;
+import javax.swing.SwingUtilities;
 
 public class Main {
-
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            MainMenuWindow mainMenu = new MainMenuWindow();
-            new MainMenuController(mainMenu);
-            mainMenu.setVisible(true);
+        // ensure GUI is created on the Swing event thread
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                MainMenuWindow mainMenu = new MainMenuWindow();
+                new MainMenuController(mainMenu);
+                mainMenu.setVisible(true);
+            }
         });
     }
 }
+
