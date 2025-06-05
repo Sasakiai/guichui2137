@@ -4,11 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
+/**
+ * First screen presented to the player with simple menu options.
+ */
 public class MainMenuWindow extends JFrame {
     private JButton newGameButton;
     private JButton highScoresButton;
     private JButton exitButton;
 
+    /**
+     * Builds the menu window and its components.
+     */
     public MainMenuWindow() {
         setTitle("Pac-Man");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -19,6 +25,9 @@ public class MainMenuWindow extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Creates and arranges all Swing components.
+     */
     private void initComponents() {
         ImageIcon iconPac = new ImageIcon(getClass().getResource("/iconPac.png"));
         setIconImage(iconPac.getImage());
@@ -84,14 +93,23 @@ public class MainMenuWindow extends JFrame {
         return button;
     }
 
+    /**
+     * Registers a listener for the "new game" button.
+     */
     public void addNewGameListener(ActionListener listener) {
         newGameButton.addActionListener(listener);
     }
 
+    /**
+     * Registers a listener for the high scores button.
+     */
     public void addHighScoresListener(ActionListener listener) {
         highScoresButton.addActionListener(listener);
     }
 
+    /**
+     * Registers a listener for the exit button.
+     */
     public void addExitListener(ActionListener listener) {
         exitButton.addActionListener(listener);
     }

@@ -2,15 +2,19 @@ package model;
 
 import javax.swing.table.AbstractTableModel;
 
-// dostarcza dane do JTable
+/**
+ * Table model used by the game board JTable.
+ */
 public class GameBoardModel extends AbstractTableModel {
     private GameState gameState;
 
+    /**
+     * Wraps the current game state for the JTable.
+     */
     public GameBoardModel(GameState state) {
         this.gameState = state;
     }
 
-    // informują JTable ile ma wierszy i kolumn
     @Override
     public int getRowCount() {
         return gameState.getBoardMap().getRows();
@@ -21,8 +25,6 @@ public class GameBoardModel extends AbstractTableModel {
         return gameState.getBoardMap().getCols();
     }
 
-    // zwraca do JTable obiekt, który ma być narysowany w danym miejscu planszy
-    // tutaj jeśli jest w komórce pac - daje sprite, jeśli nie - daje tiletype
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         for (Ghost ghost : gameState.getGhosts()) {
@@ -47,10 +49,9 @@ public class GameBoardModel extends AbstractTableModel {
         return gameState.getBoardMap().getTileAt(rowIndex, columnIndex);
     }
 
-    /* public GameState getState() {
-        return gameState;
-    } */
-
+    /**
+     * Notifies the JTable that data has changed.
+     */
     public void refresh() {
         fireTableRowsUpdated(0, getRowCount() - 1);
     }

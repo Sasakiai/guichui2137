@@ -1,25 +1,38 @@
 package controller;
 
-import model.*;
-import view.GameWindow;
-import view.HighScoresWindow;
+import model.BoardMap;
+import model.Direction;
+import model.GameBoardModel;
+import model.GameState;
+import model.Ghost;
+import model.HighScoresManager;
+import model.Player;
+import model.Position;
+import model.PowerUp;
+import model.PowerUpType;
+import model.ScoreEntry;
 import view.EndGameWindow;
-import java.util.Random;
-import java.util.function.Consumer;
+import view.GameWindow;
+import view.NameSubmitListener;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.List;
+import java.util.Random;
 
+/**
+ * Controls the gameplay loop and reacts to user input.
+ */
 public class GameController {
-    private GameBoardModel model;
-    private GameState gameState;
-    private GameWindow view;
+    private final GameBoardModel model;
+    private final GameState gameState;
+    private final GameWindow view;
     private Thread ghostThread;
+    private Thread powerUpThread;
     private volatile boolean running;
     private long startTime;
     private final Random random = new Random();
-    private long lastDropTime = 0L;
 
     public GameController(GameBoardModel model, GameWindow view, GameState gameState) {
         this.model = model;
@@ -34,22 +47,31 @@ public class GameController {
         view.updateTime(0);
 
         createGhosts();
-        startGhostThread();
-        keyListener();
+        startThreads();
+        setupKeyListener();
     }
 
-    private void keyListener() {
+    private void setupKeyListener() {
         view.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-
-                Direction dir = switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP -> Direction.UP;
-                    case KeyEvent.VK_DOWN -> Direction.DOWN;
-                    case KeyEvent.VK_LEFT -> Direction.LEFT;
-                    case KeyEvent.VK_RIGHT -> Direction.RIGHT;
-                    default -> null;
-                };
+                Direction dir = null;
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_UP:
+                        dir = Direction.UP;
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        dir = Direction.DOWN;
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        dir = Direction.LEFT;
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        dir = Direction.RIGHT;
+                        break;
+                    default:
+                        break;
+                }
 
                 if (dir != null) {
                     if (startTime == 0L) {
@@ -65,89 +87,132 @@ public class GameController {
     }
 
     private void createGhosts() {
-        Ghost pinkGhost = new Ghost(new Position(13, 11), "ghostPink.png", 0);
-        Ghost blueGhost = new Ghost(new Position(13, 15), "ghostBlue.png", 1);
-        Ghost purpleGhost = new Ghost(new Position(15, 11), "ghostPurple.png", 2);
-        Ghost mintGhost = new Ghost(new Position(15, 15), "ghostMint.png", 3);
+        gameState.addGhost(new Ghost(new Position(13, 11), "ghostPink.png", 0));
+        gameState.addGhost(new Ghost(new Position(13, 15), "ghostBlue.png", 1));
+        gameState.addGhost(new Ghost(new Position(15, 11), "ghostPurple.png", 2));
+        gameState.addGhost(new Ghost(new Position(15, 15), "ghostMint.png", 3));
+    }
 
-        gameState.addGhost(pinkGhost);
-        gameState.addGhost(blueGhost);
-        gameState.addGhost(purpleGhost);
-        gameState.addGhost(mintGhost);
+    private void startThreads() {
+        running = true;
+        startGhostThread();
+        startPowerUpThread();
     }
 
     private void startGhostThread() {
-        running = true;
-        ghostThread = new Thread(() -> {
-            while (running) {
-                gameState.moveGhosts();
-                maybeSpawnPowerUp();
-                SwingUtilities.invokeLater(() -> {
-                    model.refresh();
-                    view.updateScore(gameState.getScore());
-                    view.updateHearts(gameState.getPlayer().getHearts());
-                    if (startTime != 0L) {
-                        view.updateTime(System.currentTimeMillis() - startTime);
+        ghostThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (running) {
+                    gameState.moveGhosts();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            model.refresh();
+                            view.updateScore(gameState.getScore());
+                            view.updateHearts(gameState.getPlayer().getHearts());
+                            if (startTime != 0L) {
+                                long elapsed = System.currentTimeMillis() - startTime;
+                                view.updateTime(elapsed);
+                            }
+                        }
+                    });
+
+                    if (gameState.isGameOver()) {
+                        running = false;
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                endGame();
+                            }
+                        });
+                        break;
                     }
-                });
 
-                if (gameState.isGameOver()) {
-                    running = false;
-                    SwingUtilities.invokeLater(this::endGame);
-                    break;
-                }
-
-                try {
-                    Thread.sleep(gameState.getGhostMoveDelay());
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+                    try {
+                        Thread.sleep(gameState.getGhostMoveDelay());
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
             }
         });
         ghostThread.start();
     }
 
-    private void maybeSpawnPowerUp() {
-        long now = System.currentTimeMillis();
-        if (now - lastDropTime >= 5000) {
-            lastDropTime = now;
-            if (random.nextInt(100) < 25) {
-                var ghosts = gameState.getGhosts();
-                if (!ghosts.isEmpty()) {
-                    Ghost g = ghosts.get(random.nextInt(ghosts.size()));
-                    Position pos = new Position(g.getPosition().getRow(), g.getPosition().getCol());
-                    PowerUpType[] types = PowerUpType.values();
-                    PowerUpType type = types[random.nextInt(types.length)];
-                    gameState.addPowerUp(new PowerUp(pos, type));
+    private void startPowerUpThread() {
+        powerUpThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (running) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+
+                    if (!running) {
+                        break;
+                    }
+
+                    if (Math.random() < 0.25) {
+                        spawnPowerUp();
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                model.refresh();
+                            }
+                        });
+                    }
                 }
             }
+        });
+        powerUpThread.start();
+    }
+
+    private void spawnPowerUp() {
+        List<Ghost> ghosts = gameState.getGhosts();
+        if (ghosts.isEmpty()) {
+            return;
         }
+        Ghost g = ghosts.get(random.nextInt(ghosts.size()));
+        Position pos = new Position(g.getPosition().getRow(), g.getPosition().getCol());
+        PowerUpType[] types = PowerUpType.values();
+        PowerUpType type = types[random.nextInt(types.length)];
+        gameState.addPowerUp(new PowerUp(pos, type));
     }
 
     private void endGame() {
-        // Freeze the game view for a short moment so the prompt does not
-        // immediately pop up in the player's face.
-        Thread delayThread = new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException ignored) {
+        Thread delayThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {
+                }
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        view.setVisible(false);
+                        NameSubmitListener submit = new NameSubmitListener() {
+                            @Override
+                            public void onSubmit(String playerName) {
+                                String name = (playerName == null || playerName.trim().isEmpty())
+                                        ? "Player" : playerName;
+                                HighScoresManager manager = new HighScoresManager();
+                                manager.addScore(new ScoreEntry(name, gameState.getScore()));
+                                view.dispose();
+                            }
+                        };
+                        EndGameWindow window = new EndGameWindow(gameState.getScore(), submit);
+                        window.setVisible(true);
+                    }
+                });
             }
-            SwingUtilities.invokeLater(() -> {
-                view.setVisible(false);
-
-                Consumer<String> submit = playerName -> {
-                    String name = (playerName == null || playerName.isBlank()) ? "Player" : playerName;
-                    HighScoresManager manager = new HighScoresManager();
-                    manager.addScore(new ScoreEntry(name, gameState.getScore()));
-
-                    view.dispose();
-                };
-
-                EndGameWindow window = new EndGameWindow(gameState.getScore(), submit);
-                window.setVisible(true);
-            });
         });
         delayThread.start();
     }
 }
+

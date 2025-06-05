@@ -1,6 +1,11 @@
 package model;
 
-// Reprezentuje kierunki, używany
+/**
+ * Cardinal directions for entity movement.
+ */
 public enum Direction {
-    UP, DOWN, LEFT, RIGHT;
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
 }
