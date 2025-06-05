@@ -2,11 +2,15 @@ package model;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+
 
 public class HighScoresManager {
     private static final String FILE_NAME = "highscores.ser";
 
+    
     public List<ScoreEntry> loadScores() {
         File file = new File(FILE_NAME);
         if (!file.exists()) {
@@ -24,6 +28,7 @@ public class HighScoresManager {
         return new ArrayList<>();
     }
 
+    
     public void saveScores(List<ScoreEntry> scores) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
             out.writeObject(scores);
@@ -32,10 +37,16 @@ public class HighScoresManager {
         }
     }
 
+    
     public void addScore(ScoreEntry entry) {
         List<ScoreEntry> scores = loadScores();
         scores.add(entry);
-        scores.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
+        Collections.sort(scores, new Comparator<ScoreEntry>() {
+            @Override
+            public int compare(ScoreEntry a, ScoreEntry b) {
+                return Integer.compare(b.getScore(), a.getScore());
+            }
+        });
         saveScores(scores);
     }
 }

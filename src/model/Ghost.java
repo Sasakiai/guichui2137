@@ -6,12 +6,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Random;
 
+
 public class Ghost extends Entity {
     private final BufferedImage sprite;
     private final Random random = new Random();
     private final int order;
     private boolean leavingHouse = true;
 
+    
     public Ghost(Position position, String spriteName, int order) {
         super(position);
         this.order = order;
@@ -32,19 +34,23 @@ public class Ghost extends Entity {
         }
     }
 
+    
     public BufferedImage getSprite() {
         return sprite;
     }
 
+    
     public int getOrder() {
         return order;
     }
 
+    
     private Direction getRandomDirection() {
         Direction[] directions = Direction.values();
         return directions[random.nextInt(directions.length)];
     }
 
+    
     public Direction nextDirection(BoardMap map) {
         // choose a random valid direction so ghosts keep moving
         for (int i = 0; i < 10; i++) {

@@ -6,8 +6,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+
 public class HighScoresWindow extends JFrame {
 
+    
     public HighScoresWindow(List<ScoreEntry> scores) {
         setTitle("High Scores: Pac-Man");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // CHECK
@@ -36,7 +38,7 @@ public class HighScoresWindow extends JFrame {
 
         mainPanel.add(titlePanel, BorderLayout.NORTH);
 
-        DefaultListModel<String> listModel = new DefaultListModel<>();
+        DefaultListModel<String> listModel = new DefaultListModel<String>();
         int rank = 1;
         for (ScoreEntry entry : scores) {
             listModel.addElement(rank++ + ". " + entry.getName() + " - " + entry.getScore());
@@ -57,9 +59,11 @@ public class HighScoresWindow extends JFrame {
         setVisible(true);
     }
 
+    
     private ImageIcon scaleImage(String imagePath, int width, int height) {
         ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
         Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(scaledImage);
     }
 }
+

@@ -4,11 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
+
 public class MainMenuWindow extends JFrame {
     private JButton newGameButton;
     private JButton highScoresButton;
     private JButton exitButton;
 
+    
     public MainMenuWindow() {
         setTitle("Pac-Man");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -19,6 +21,7 @@ public class MainMenuWindow extends JFrame {
         setVisible(true);
     }
 
+    
     private void initComponents() {
         ImageIcon iconPac = new ImageIcon(getClass().getResource("/iconPac.png"));
         setIconImage(iconPac.getImage());
@@ -84,14 +87,17 @@ public class MainMenuWindow extends JFrame {
         return button;
     }
 
+    
     public void addNewGameListener(ActionListener listener) {
         newGameButton.addActionListener(listener);
     }
 
+    
     public void addHighScoresListener(ActionListener listener) {
         highScoresButton.addActionListener(listener);
     }
 
+    
     public void addExitListener(ActionListener listener) {
         exitButton.addActionListener(listener);
     }

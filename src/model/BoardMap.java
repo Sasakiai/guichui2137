@@ -1,6 +1,6 @@
 package model;
 
-// przechowuje planszę gry
+
 public class BoardMap {
     private TileType[][] board;
     private final int rows = 31;
@@ -10,6 +10,7 @@ public class BoardMap {
         createMap();
     }
 
+    
     private void createMap() {
         board = new TileType[rows][cols];
 
@@ -69,16 +70,18 @@ public class BoardMap {
         return board[row][col];
     }
 
-    // umożliwia zmianę typu kafelka, kiedy pacman zje kropkę
+    
     public void setTileAt(int row, int col, TileType type) {
         board[row][col] = type;
     }
 
-    // głównie dla JTable, aby wiedział jak wysoka/szeroka ma być mapa
+    
     public int getRows() { return rows; }
 
+    
     public int getCols() { return cols; }
 
+    
     public boolean hasDotsRemaining() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {

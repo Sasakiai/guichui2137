@@ -11,6 +11,7 @@ import model.GameBoardModel;
 import model.GameState;
 import model.TileType;
 
+
 public class GameWindow extends JFrame {
     private GameBoardModel boardModel;
     private GameState gameState;
@@ -20,6 +21,7 @@ public class GameWindow extends JFrame {
     private JPanel heartsPanel;
     private ImageIcon heartIcon;
 
+    
     public GameWindow(GameBoardModel boardModel, GameState gameState) {
         this.boardModel = boardModel;
         this.gameState = gameState;
@@ -29,6 +31,7 @@ public class GameWindow extends JFrame {
         requestFocusInWindow();
     }
 
+    
     private void init() {
         setTitle("Play: Pac-Man");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -92,26 +95,34 @@ public class GameWindow extends JFrame {
 
     private class GameCellRenderer extends DefaultTableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
+            JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                    isSelected, hasFocus, row, column);
 
             label.setHorizontalAlignment(JLabel.CENTER);
             label.setVerticalAlignment(JLabel.CENTER);
             label.setText("");
 
-            if (value instanceof BufferedImage image) {
-                label.setIcon(new ImageIcon(image));
+            if (value instanceof BufferedImage) {
+                BufferedImage img = (BufferedImage) value;
+                label.setIcon(new ImageIcon(img));
                 label.setBackground(new Color(0xFFF9E6));
-            } else if (value instanceof TileType tile) {
+            } else if (value instanceof TileType) {
+                TileType tile = (TileType) value;
                 label.setIcon(null);
 
                 switch (tile) {
-                    case WALL -> label.setBackground(new Color(0xF08080));
-                    case DOT -> {
+                    case WALL:
+                        label.setBackground(new Color(0xF08080));
+                        break;
+                    case DOT:
                         return new DotPanel();
-                    }
-                    case EMPTY -> label.setBackground(new Color(0xFFF9E6));
-                    default -> label.setBackground(new Color(0xFFF9E6));
+                    case EMPTY:
+                    default:
+                        label.setBackground(new Color(0xFFF9E6));
+                        break;
                 }
             } else {
                 label.setIcon(null);
@@ -138,14 +149,17 @@ public class GameWindow extends JFrame {
         }
     }
 
+    
     public JTable getGameTable() {
         return gameTable;
     }
 
+    
     public void updateScore(int score) {
         scoreLabel.setText("Score: " + score);
     }
 
+    
     public void updateTime(long millis) {
         long seconds = millis / 1000;
         long minutes = seconds / 60;
@@ -153,6 +167,7 @@ public class GameWindow extends JFrame {
         timeLabel.setText(String.format("Time: %02d:%02d", minutes, sec));
     }
 
+    
     public void updateHearts(int hearts) {
         heartsPanel.removeAll();
         for (int i = 0; i < hearts; i++) {

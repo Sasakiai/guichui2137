@@ -3,22 +3,47 @@ package controller;
 import model.BoardMap;
 import model.GameBoardModel;
 import model.GameState;
-import view.MainMenuWindow;
+import model.HighScoresManager;
 import view.GameWindow;
 import view.HighScoresWindow;
-import model.HighScoresManager;
+import view.MainMenuWindow;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+/**
+ * Handles user interaction with the main menu.
+ */
 public class MainMenuController {
-    private MainMenuWindow window;
+    private final MainMenuWindow window;
 
     public MainMenuController(MainMenuWindow window) {
         this.window = window;
 
-        window.addNewGameListener(e -> startNewGame());
-        window.addHighScoresListener(e -> showHighScores());
-        window.addExitListener(e -> System.exit(0));
+        window.addNewGameListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startNewGame();
+            }
+        });
+
+        window.addHighScoresListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showHighScores();
+            }
+        });
+
+        window.addExitListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
     }
 
+    /**
+     * Begins a new game and opens the game window.
+     */
     private void startNewGame() {
         window.setVisible(false);
 
@@ -37,6 +62,9 @@ public class MainMenuController {
         gameWindow.setVisible(true);
     }
 
+    /**
+     * Displays the saved high scores.
+     */
     private void showHighScores() {
         window.setVisible(false);
 

@@ -10,42 +10,47 @@ public class GameState {
     private int score;
     private final List<Ghost> ghosts = new ArrayList<>();
     private final List<PowerUp> powerUps = new ArrayList<>();
-    private long doublePointsUntil = 0;
-    private long ghostSlowUntil = 0;
+    private boolean doublePoints = false;
+    private boolean ghostSlow = false;
     private boolean gameOver = false;
 
+    
     public GameState(BoardMap boardMap) {
         this.boardMap = boardMap;
         this.score = 0;
     }
 
-    // wrzucam gracza na mapę po jego stworzeniu przez GameController
+    
     public void setPlayer(Player player) {
         this.player = player;
     }
 
-    //zwracm stan pacmana
+    
     public Player getPlayer() {
         return player;
     }
 
-    // uzywany przez GameWindow do wyświetlania wyniku
+    
     public int getScore() {
         return score;
     }
 
+    
     public BoardMap getBoardMap() {
         return boardMap;
     }
 
+    
     public List<Ghost> getGhosts() {
         return ghosts;
     }
 
+    
     public List<PowerUp> getPowerUps() {
         return powerUps;
     }
 
+    
     public void addPowerUp(PowerUp p) {
         powerUps.add(p);
     }
@@ -54,21 +59,22 @@ public class GameState {
         powerUps.remove(p);
     }
 
+    
     public void addGhost(Ghost ghost) {
         ghosts.add(ghost);
     }
 
+    
     public boolean isGameOver() {
         return gameOver;
     }
 
+    
     public int getGhostMoveDelay() {
-        if (System.currentTimeMillis() < ghostSlowUntil) {
-            return 400;
-        }
-        return 200;
+        return ghostSlow ? 400 : 200;
     }
 
+    
     private void checkCollisions() {
         if (player == null) return;
         for (Ghost ghost : ghosts) {
@@ -85,6 +91,7 @@ public class GameState {
         }
     }
 
+    
     public void moveGhosts() {
         for (Ghost ghost : ghosts) {
             ghost.move(ghost.nextDirection(boardMap), boardMap);
@@ -92,6 +99,7 @@ public class GameState {
         checkCollisions();
     }
 
+    
     public boolean movePlayer(Direction direction) {
         if (player != null) {
             if (!player.canMove()) {
@@ -127,17 +135,39 @@ public class GameState {
         return false;
     }
 
+    
     private boolean isDoublePointsActive() {
-        return System.currentTimeMillis() < doublePointsUntil;
+        return doublePoints;
     }
 
+    
     private void applyPowerUp(PowerUp powerUp) {
         switch (powerUp.getType()) {
-            case SPEED_BOOST -> player.speedUp(80, 5000);
-            case GHOST_SLOW -> ghostSlowUntil = System.currentTimeMillis() + 5000;
-            case DOUBLE_POINTS -> doublePointsUntil = System.currentTimeMillis() + 3000;
-            case BONUS_POINTS -> score += 100;
-            case INVINCIBILITY -> player.grantTemporaryInvincibility(3000);
+            case SPEED_BOOST:
+                player.speedUp(80, 5000);
+                break;
+            case GHOST_SLOW:
+                ghostSlow = true;
+                new Thread(() -> {
+                    try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                    ghostSlow = false;
+                }).start();
+                break;
+            case DOUBLE_POINTS:
+                doublePoints = true;
+                new Thread(() -> {
+                    try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                    doublePoints = false;
+                }).start();
+                break;
+            case BONUS_POINTS:
+                score += 100;
+                break;
+            case INVINCIBILITY:
+                player.grantTemporaryInvincibility(3000);
+                break;
+            default:
+                break;
         }
     }
 }

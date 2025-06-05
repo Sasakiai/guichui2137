@@ -1,5 +1,6 @@
 package model;
 
+
 public enum PowerUpType {
     SPEED_BOOST,
     GHOST_SLOW,
