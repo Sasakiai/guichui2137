@@ -2,15 +2,11 @@ package model;
 
 import javax.swing.table.AbstractTableModel;
 
-/**
- * Table model used by the game board JTable.
- */
+
 public class GameBoardModel extends AbstractTableModel {
     private GameState gameState;
 
-    /**
-     * Wraps the current game state for the JTable.
-     */
+    
     public GameBoardModel(GameState state) {
         this.gameState = state;
     }
@@ -49,9 +45,7 @@ public class GameBoardModel extends AbstractTableModel {
         return gameState.getBoardMap().getTileAt(rowIndex, columnIndex);
     }
 
-    /**
-     * Notifies the JTable that data has changed.
-     */
+    
     public void refresh() {
         fireTableRowsUpdated(0, getRowCount() - 1);
     }

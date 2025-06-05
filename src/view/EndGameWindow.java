@@ -3,9 +3,7 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Simple dialog shown when the game ends so the player can enter a name.
- */
+
 public class EndGameWindow extends JFrame {
     private final JTextField nameField = new JTextField();
 

@@ -6,14 +6,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Window that lists stored high scores.
- */
+
 public class HighScoresWindow extends JFrame {
 
-    /**
-     * Shows high scores in a scrollable list.
-     */
+    
     public HighScoresWindow(List<ScoreEntry> scores) {
         setTitle("High Scores: Pac-Man");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // CHECK
@@ -63,9 +59,7 @@ public class HighScoresWindow extends JFrame {
         setVisible(true);
     }
 
-    /**
-     * Utility helper for image scaling.
-     */
+    
     private ImageIcon scaleImage(String imagePath, int width, int height) {
         ImageIcon icon = new ImageIcon(getClass().getResource(imagePath));
         Image scaledImage = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);

@@ -1,23 +1,17 @@
 package model;
 
-/**
- * Simple holder for board coordinates.
- */
+
 public class Position {
     public int row;
     public int col;
 
-    /**
-     * Creates a position with row and column values.
-     */
+    
     public Position(int row, int col) {
         this.row = row;
         this.col = col;
     }
 
-    /**
-     * @return a new position moved one step in the given direction.
-     */
+    
     public Position nextInDirection(Direction dir) {
         switch (dir) {
             case UP:
@@ -33,14 +27,10 @@ public class Position {
         }
     }
 
-    /**
-     * @return row index
-     */
+    
     public int getRow() { return row; }
 
-    /**
-     * @return column index
-     */
+    
     public int getCol() { return col; }
 }
 

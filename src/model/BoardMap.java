@@ -1,8 +1,6 @@
 package model;
 
-/**
- * Holds the static tiles for the game board.
- */
+
 public class BoardMap {
     private TileType[][] board;
     private final int rows = 31;
@@ -12,9 +10,7 @@ public class BoardMap {
         createMap();
     }
 
-    /**
-     * Initializes the board layout using a simple template.
-     */
+    
     private void createMap() {
         board = new TileType[rows][cols];
 
@@ -74,26 +70,18 @@ public class BoardMap {
         return board[row][col];
     }
 
-    /**
-     * Allows changing a tile when the player eats a dot.
-     */
+    
     public void setTileAt(int row, int col, TileType type) {
         board[row][col] = type;
     }
 
-    /**
-     * @return number of rows on the board
-     */
+    
     public int getRows() { return rows; }
 
-    /**
-     * @return number of columns on the board
-     */
+    
     public int getCols() { return cols; }
 
-    /**
-     * Checks whether any dots are still on the board.
-     */
+    
     public boolean hasDotsRemaining() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {

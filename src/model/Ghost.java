@@ -6,18 +6,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Random;
 
-/**
- * Simple AI controlled enemy.
- */
+
 public class Ghost extends Entity {
     private final BufferedImage sprite;
     private final Random random = new Random();
     private final int order;
     private boolean leavingHouse = true;
 
-    /**
-     * Creates a ghost at the given position using the supplied sprite file.
-     */
+    
     public Ghost(Position position, String spriteName, int order) {
         super(position);
         this.order = order;
@@ -38,31 +34,23 @@ public class Ghost extends Entity {
         }
     }
 
-    /**
-     * @return sprite image used when rendering this ghost
-     */
+    
     public BufferedImage getSprite() {
         return sprite;
     }
 
-    /**
-     * @return spawn order used to stagger release
-     */
+    
     public int getOrder() {
         return order;
     }
 
-    /**
-     * Picks a random direction.
-     */
+    
     private Direction getRandomDirection() {
         Direction[] directions = Direction.values();
         return directions[random.nextInt(directions.length)];
     }
 
-    /**
-     * Chooses the next move for the ghost.
-     */
+    
     public Direction nextDirection(BoardMap map) {
         // choose a random valid direction so ghosts keep moving
         for (int i = 0; i < 10; i++) {

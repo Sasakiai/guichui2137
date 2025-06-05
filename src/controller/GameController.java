@@ -1,6 +1,5 @@
 package controller;
 
-import model.BoardMap;
 import model.Direction;
 import model.GameBoardModel;
 import model.GameState;
@@ -8,8 +7,6 @@ import model.Ghost;
 import model.HighScoresManager;
 import model.Player;
 import model.Position;
-import model.PowerUp;
-import model.PowerUpType;
 import model.ScoreEntry;
 import view.EndGameWindow;
 import view.GameWindow;
@@ -18,40 +15,37 @@ import view.NameSubmitListener;
 import javax.swing.SwingUtilities;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.List;
 import java.util.Random;
 
-/**
- * Controls the gameplay loop and reacts to user input.
- */
 public class GameController {
     private final GameBoardModel model;
-    private final GameState gameState;
+    private final GameState state;
     private final GameWindow view;
     private Thread ghostThread;
-    private Thread powerUpThread;
+    private Thread powerThread;
     private volatile boolean running;
     private long startTime;
     private final Random random = new Random();
 
-    public GameController(GameBoardModel model, GameWindow view, GameState gameState) {
+    public GameController(GameBoardModel model, GameWindow view, GameState state) {
         this.model = model;
         this.view = view;
-        this.gameState = gameState;
-        this.startTime = 0L;
-
+        this.state = state;
         Player player = new Player(new Position(23, 13), 3);
-        gameState.setPlayer(player);
-        view.updateScore(gameState.getScore());
+        state.setPlayer(player);
+        view.updateScore(state.getScore());
         view.updateHearts(player.getHearts());
         view.updateTime(0);
-
         createGhosts();
-        startThreads();
-        setupKeyListener();
+        running = true;
+        ghostThread = new Thread(new GhostMover(state, model, view, this));
+        powerThread = new Thread(new PowerUpSpawner(state, model, this));
+        ghostThread.start();
+        powerThread.start();
+        setupKeys();
     }
 
-    private void setupKeyListener() {
+    private void setupKeys() {
         view.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -72,147 +66,56 @@ public class GameController {
                     default:
                         break;
                 }
-
                 if (dir != null) {
                     if (startTime == 0L) {
                         startTime = System.currentTimeMillis();
                     }
-                    gameState.getPlayer().setDirection(dir);
-                    gameState.movePlayer(dir);
+                    state.getPlayer().setDirection(dir);
+                    state.movePlayer(dir);
                     model.refresh();
-                    view.updateScore(gameState.getScore());
+                    view.updateScore(state.getScore());
                 }
             }
         });
     }
 
     private void createGhosts() {
-        gameState.addGhost(new Ghost(new Position(13, 11), "ghostPink.png", 0));
-        gameState.addGhost(new Ghost(new Position(13, 15), "ghostBlue.png", 1));
-        gameState.addGhost(new Ghost(new Position(15, 11), "ghostPurple.png", 2));
-        gameState.addGhost(new Ghost(new Position(15, 15), "ghostMint.png", 3));
+        state.addGhost(new Ghost(new Position(13, 11), "ghostPink.png", 0));
+        state.addGhost(new Ghost(new Position(13, 15), "ghostBlue.png", 1));
+        state.addGhost(new Ghost(new Position(15, 11), "ghostPurple.png", 2));
+        state.addGhost(new Ghost(new Position(15, 15), "ghostMint.png", 3));
     }
 
-    private void startThreads() {
-        running = true;
-        startGhostThread();
-        startPowerUpThread();
+    public boolean isRunning() {
+        return running;
     }
 
-    private void startGhostThread() {
-        ghostThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (running) {
-                    gameState.moveGhosts();
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            model.refresh();
-                            view.updateScore(gameState.getScore());
-                            view.updateHearts(gameState.getPlayer().getHearts());
-                            if (startTime != 0L) {
-                                long elapsed = System.currentTimeMillis() - startTime;
-                                view.updateTime(elapsed);
-                            }
-                        }
-                    });
+    public long getStartTime() {
+        return startTime;
+    }
 
-                    if (gameState.isGameOver()) {
-                        running = false;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                endGame();
-                            }
-                        });
-                        break;
-                    }
+    public void stopRunning() {
+        running = false;
+    }
 
-                    try {
-                        Thread.sleep(gameState.getGhostMoveDelay());
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
-                }
+    public void endGame() {
+        Thread t = new Thread(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ignored) {
             }
+            SwingUtilities.invokeLater(() -> {
+                view.setVisible(false);
+                NameSubmitListener submit = name -> {
+                    String n = (name == null || name.trim().isEmpty()) ? "Player" : name;
+                    HighScoresManager manager = new HighScoresManager();
+                    manager.addScore(new ScoreEntry(n, state.getScore()));
+                    view.dispose();
+                };
+                EndGameWindow window = new EndGameWindow(state.getScore(), submit);
+                window.setVisible(true);
+            });
         });
-        ghostThread.start();
-    }
-
-    private void startPowerUpThread() {
-        powerUpThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (running) {
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
-
-                    if (!running) {
-                        break;
-                    }
-
-                    if (Math.random() < 0.25) {
-                        spawnPowerUp();
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                model.refresh();
-                            }
-                        });
-                    }
-                }
-            }
-        });
-        powerUpThread.start();
-    }
-
-    private void spawnPowerUp() {
-        List<Ghost> ghosts = gameState.getGhosts();
-        if (ghosts.isEmpty()) {
-            return;
-        }
-        Ghost g = ghosts.get(random.nextInt(ghosts.size()));
-        Position pos = new Position(g.getPosition().getRow(), g.getPosition().getCol());
-        PowerUpType[] types = PowerUpType.values();
-        PowerUpType type = types[random.nextInt(types.length)];
-        gameState.addPowerUp(new PowerUp(pos, type));
-    }
-
-    private void endGame() {
-        Thread delayThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ignored) {
-                }
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        view.setVisible(false);
-                        NameSubmitListener submit = new NameSubmitListener() {
-                            @Override
-                            public void onSubmit(String playerName) {
-                                String name = (playerName == null || playerName.trim().isEmpty())
-                                        ? "Player" : playerName;
-                                HighScoresManager manager = new HighScoresManager();
-                                manager.addScore(new ScoreEntry(name, gameState.getScore()));
-                                view.dispose();
-                            }
-                        };
-                        EndGameWindow window = new EndGameWindow(gameState.getScore(), submit);
-                        window.setVisible(true);
-                    }
-                });
-            }
-        });
-        delayThread.start();
+        t.start();
     }
 }
-
