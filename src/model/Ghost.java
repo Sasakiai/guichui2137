@@ -22,7 +22,7 @@ public class Ghost extends Entity {
 
     private BufferedImage loadSprite(String name) {
         try {
-            return ImageIO.read(getClass().getResource("/" + "pacBack.png"));
+            return ImageIO.read(getClass().getResource("/" + name));
         } catch (IOException e) {
             BufferedImage img = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = img.createGraphics();

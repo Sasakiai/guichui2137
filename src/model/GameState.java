@@ -71,7 +71,7 @@ public class GameState {
 
     
     public int getGhostMoveDelay() {
-        return ghostSlow ? 400 : 200;
+        return ghostSlow ? 400 : 400;
     }
 
     
@@ -120,6 +120,8 @@ public class GameState {
 
                 for (int i = 0; i < powerUps.size(); i++) {
                     PowerUp p = powerUps.get(i);
+                    System.out.println(p.getPosition().col + " " + p.getPosition().row);
+                    System.out.println(newPos.col + " " + newPos.row);
                     if (p.getPosition().equals(newPos)) {
                         applyPowerUp(p);
                         powerUps.remove(i);
