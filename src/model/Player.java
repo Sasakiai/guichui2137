@@ -17,7 +17,6 @@ public class Player extends Entity {
     private volatile boolean invincible;
     private volatile boolean frozen;
     private long moveDelay = 150;
-    private long nextAllowedMove = 0;
 
     
     public Player(Position position, int hearts) {
@@ -40,18 +39,10 @@ public class Player extends Entity {
         }
     }
 
-    private BufferedImage scale(BufferedImage original, int size) {
-        BufferedImage scaled = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = scaled.createGraphics();
-        g2.drawImage(original, 0, 0, size, size, null);
-        g2.dispose();
-        return scaled;
-    }
-
     
-    public BufferedImage getSprite() {
+    public Image getSprite() {
         BufferedImage original = sprites.get(direction);
-        return scale(original, 30);
+        return original.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
     }
 
     
@@ -74,8 +65,7 @@ public class Player extends Entity {
 
     
     public boolean canMove() {
-        long now = System.currentTimeMillis();
-        return !frozen && now >= nextAllowedMove;
+        return !frozen;
     }
 
     
@@ -114,9 +104,6 @@ public class Player extends Entity {
     @Override
     public boolean move(Direction dir, BoardMap map) {
         boolean moved = super.move(dir, map);
-        if (moved) {
-            nextAllowedMove = System.currentTimeMillis() + moveDelay;
-        }
         return moved;
     }
 }

@@ -11,7 +11,6 @@ import model.GameBoardModel;
 import model.GameState;
 import model.TileType;
 
-
 public class GameWindow extends JFrame {
     private GameBoardModel boardModel;
     private GameState gameState;
@@ -20,18 +19,17 @@ public class GameWindow extends JFrame {
     private JLabel timeLabel;
     private JPanel heartsPanel;
     private ImageIcon heartIcon;
+    private static final ImageIcon dotIcon = createDotIcon();
 
-    
     public GameWindow(GameBoardModel boardModel, GameState gameState) {
         this.boardModel = boardModel;
         this.gameState = gameState;
         init();
-        gameTable.setFocusable(false); //potrzebne, żeby keyListener zadziałał
+        gameTable.setFocusable(false);
         setFocusable(true);
         requestFocusInWindow();
     }
 
-    
     private void init() {
         setTitle("Play: Pac-Man");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -109,6 +107,9 @@ public class GameWindow extends JFrame {
                 BufferedImage img = (BufferedImage) value;
                 label.setIcon(new ImageIcon(img));
                 label.setBackground(new Color(0xFFF9E6));
+            } else if (value instanceof  Image) {
+                label.setIcon(new ImageIcon((Image) value));
+                label.setBackground(new Color(0xFFF9E6));
             } else if (value instanceof TileType) {
                 TileType tile = (TileType) value;
                 label.setIcon(null);
@@ -118,7 +119,9 @@ public class GameWindow extends JFrame {
                         label.setBackground(new Color(0xF08080));
                         break;
                     case DOT:
-                        return new DotPanel();
+                        label.setIcon(dotIcon);
+                        label.setBackground(new Color(0xFFF9E6));
+                        break;
                     case EMPTY:
                     default:
                         label.setBackground(new Color(0xFFF9E6));
@@ -132,34 +135,14 @@ public class GameWindow extends JFrame {
         }
     }
 
-    private static class DotPanel extends JPanel {
-        public DotPanel() {
-            setBackground(new Color(0xFFF9E6));
-            setOpaque(true);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(new Color(0xF8AD9D));
-            int size = Math.min(getWidth(), getHeight()) / 3;
-            int x = (getWidth() - size) / 2;
-            int y = (getHeight() - size) / 2;
-            g.fillOval(x, y, size, size);
-        }
-    }
-
-    
     public JTable getGameTable() {
         return gameTable;
     }
 
-    
     public void updateScore(int score) {
         scoreLabel.setText("Score: " + score);
     }
 
-    
     public void updateTime(long millis) {
         long seconds = millis / 1000;
         long minutes = seconds / 60;
@@ -167,7 +150,6 @@ public class GameWindow extends JFrame {
         timeLabel.setText(String.format("Time: %02d:%02d", minutes, sec));
     }
 
-    
     public void updateHearts(int hearts) {
         heartsPanel.removeAll();
         for (int i = 0; i < hearts; i++) {
@@ -191,5 +173,12 @@ public class GameWindow extends JFrame {
         } catch (IOException | IllegalArgumentException e) {
             heartIcon = null;
         }
+    }
+
+    private static ImageIcon createDotIcon() {
+        BufferedImage onePx = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        onePx.setRGB(0, 0, new Color(0xF8AD9D).getRGB());
+        Image scaled = onePx.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
     }
 }

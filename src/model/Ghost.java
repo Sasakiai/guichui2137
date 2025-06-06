@@ -6,14 +6,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Random;
 
-
 public class Ghost extends Entity {
     private final BufferedImage sprite;
     private final Random random = new Random();
     private final int order;
     private boolean leavingHouse = true;
 
-    
     public Ghost(Position position, String spriteName, int order) {
         super(position);
         this.order = order;
@@ -24,32 +22,23 @@ public class Ghost extends Entity {
         try {
             return ImageIO.read(getClass().getResource("/" + name));
         } catch (IOException e) {
-            BufferedImage img = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2 = img.createGraphics();
-            g2.setColor(Color.MAGENTA);
-            g2.fillOval(0, 0, 30, 30);
-            g2.dispose();
-            return img;
+            return new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
         }
     }
 
-    
     public BufferedImage getSprite() {
         return sprite;
     }
 
-    
     public int getOrder() {
         return order;
     }
 
-    
     private Direction getRandomDirection() {
         Direction[] directions = Direction.values();
         return directions[random.nextInt(directions.length)];
     }
 
-    
     public Direction nextDirection(BoardMap map) {
         for (int i = 0; i < 10; i++) {
             Direction dir = getRandomDirection();
@@ -58,7 +47,6 @@ public class Ghost extends Entity {
                 return dir;
             }
         }
-
         return Direction.UP;
     }
 }
