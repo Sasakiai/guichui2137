@@ -22,9 +22,8 @@ public class Ghost extends Entity {
 
     private BufferedImage loadSprite(String name) {
         try {
-            return ImageIO.read(getClass().getResource("/" + name));
+            return ImageIO.read(getClass().getResource("/" + "pacBack.png"));
         } catch (IOException e) {
-            // fallback: simple colored circle so game stays playable
             BufferedImage img = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2 = img.createGraphics();
             g2.setColor(Color.MAGENTA);
@@ -52,7 +51,6 @@ public class Ghost extends Entity {
 
     
     public Direction nextDirection(BoardMap map) {
-        // choose a random valid direction so ghosts keep moving
         for (int i = 0; i < 10; i++) {
             Direction dir = getRandomDirection();
             Position next = position.nextInDirection(dir);
@@ -60,7 +58,7 @@ public class Ghost extends Entity {
                 return dir;
             }
         }
-        // fallback if somehow surrounded by walls
+
         return Direction.UP;
     }
 }

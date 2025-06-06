@@ -118,13 +118,11 @@ public class GameState {
                     }
                 }
 
-                Iterator<PowerUp> it = powerUps.iterator();
-                while (it.hasNext()) {
-                    PowerUp p = it.next();
-                    Position pp = p.getPosition();
-                    if (pp.getRow() == newPos.getRow() && pp.getCol() == newPos.getCol()) {
+                for (int i = 0; i < powerUps.size(); i++) {
+                    PowerUp p = powerUps.get(i);
+                    if (p.getPosition().equals(newPos)) {
                         applyPowerUp(p);
-                        it.remove();
+                        powerUps.remove(i);
                         break;
                     }
                 }
@@ -149,14 +147,14 @@ public class GameState {
             case GHOST_SLOW:
                 ghostSlow = true;
                 new Thread(() -> {
-                    try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                    try { Thread.sleep(5000); } catch (InterruptedException e) {}
                     ghostSlow = false;
                 }).start();
                 break;
             case DOUBLE_POINTS:
                 doublePoints = true;
                 new Thread(() -> {
-                    try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                    try { Thread.sleep(3000); } catch (InterruptedException e) {}
                     doublePoints = false;
                 }).start();
                 break;

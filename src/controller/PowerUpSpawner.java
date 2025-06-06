@@ -10,7 +10,7 @@ import model.Position;
 import model.PowerUp;
 import model.PowerUpType;
 
-public class PowerUpSpawner implements Runnable {
+public class PowerUpSpawner extends Thread {
     private final GameState state;
     private final GameBoardModel model;
     private final GameController controller;

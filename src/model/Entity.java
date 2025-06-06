@@ -24,11 +24,11 @@ public abstract class Entity {
     
     public boolean move(Direction dir, BoardMap map) {
         this.direction = dir;
-        Position nextP = position.nextInDirection(dir);
-        TileType nextTile = map.getTileAt(nextP.getRow(), nextP.getCol());
+        Position nextPos = position.nextInDirection(dir);
+        TileType nextTile = map.getTileAt(nextPos.getRow(), nextPos.getCol());
 
         if (nextTile != TileType.WALL) {
-            position = nextP;
+            position = nextPos;
             return true;
         }
         return false;

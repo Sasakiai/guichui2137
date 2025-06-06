@@ -9,41 +9,20 @@ import view.HighScoresWindow;
 import view.MainMenuWindow;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-/**
- * Handles user interaction with the main menu.
- */
 public class MainMenuController {
     private final MainMenuWindow window;
 
     public MainMenuController(MainMenuWindow window) {
         this.window = window;
 
-        window.addNewGameListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startNewGame();
-            }
-        });
-
-        window.addHighScoresListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showHighScores();
-            }
-        });
-
-        window.addExitListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+        window.addNewGameListener(e -> startNewGame());
+        window.addHighScoresListener(e -> showHighScores());
+        window.addExitListener(e -> System.exit(0));
     }
 
-    /**
-     * Begins a new game and opens the game window.
-     */
     private void startNewGame() {
         window.setVisible(false);
 
@@ -53,26 +32,23 @@ public class MainMenuController {
         GameWindow gameWindow =  new GameWindow(model, state);
         new GameController(model, gameWindow, state);
 
-        gameWindow.addWindowListener(new java.awt.event.WindowAdapter() {
+        gameWindow.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(java.awt.event.WindowEvent e) {
+            public void windowClosed(WindowEvent e) {
                    window.setVisible(true);
             }
         });
         gameWindow.setVisible(true);
     }
 
-    /**
-     * Displays the saved high scores.
-     */
     private void showHighScores() {
         window.setVisible(false);
 
         HighScoresManager manager = new HighScoresManager();
         HighScoresWindow scoresWindow = new HighScoresWindow(manager.loadScores());
-        scoresWindow.addWindowListener(new java.awt.event.WindowAdapter() {
+        scoresWindow.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosed(java.awt.event.WindowEvent e) {
+            public void windowClosed(WindowEvent e) {
                 window.setVisible(true);
             }
         });

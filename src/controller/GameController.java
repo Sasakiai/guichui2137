@@ -102,14 +102,15 @@ public class GameController {
         Thread t = new Thread(() -> {
             try {
                 Thread.sleep(2000);
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
             }
             SwingUtilities.invokeLater(() -> {
                 view.setVisible(false);
                 NameSubmitListener submit = name -> {
-                    String n = (name == null || name.trim().isEmpty()) ? "Player" : name;
-                    HighScoresManager manager = new HighScoresManager();
-                    manager.addScore(new ScoreEntry(n, state.getScore()));
+                    if (name != null && !name.isEmpty()) {
+                        HighScoresManager manager = new HighScoresManager();
+                        manager.addScore(new ScoreEntry(name, state.getScore()));
+                    }
                     view.dispose();
                 };
                 EndGameWindow window = new EndGameWindow(state.getScore(), submit);

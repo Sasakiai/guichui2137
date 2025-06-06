@@ -5,7 +5,7 @@ import model.GameBoardModel;
 import model.GameState;
 import view.GameWindow;
 
-public class GhostMover implements Runnable {
+public class GhostMover extends Thread {
     private final GameState state;
     private final GameBoardModel model;
     private final GameWindow view;
@@ -33,7 +33,7 @@ public class GhostMover implements Runnable {
             });
             if (state.isGameOver()) {
                 controller.stopRunning();
-                SwingUtilities.invokeLater(controller::endGame);
+                SwingUtilities.invokeLater(() -> controller.endGame());
                 break;
             }
             try {
