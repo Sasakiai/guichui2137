@@ -122,7 +122,7 @@ public class GameState {
                     PowerUp p = powerUps.get(i);
                     System.out.println(p.getPosition().col + " " + p.getPosition().row);
                     System.out.println(newPos.col + " " + newPos.row);
-                    if (p.getPosition().equals(newPos)) {
+                    if (p.getPosition().getCol() == newPos.getCol() && p.getPosition().getRow() == newPos.getRow()) {
                         applyPowerUp(p);
                         powerUps.remove(i);
                         break;

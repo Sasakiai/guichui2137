@@ -14,8 +14,8 @@ public class Player extends Entity {
     private int hearts;
     private Direction direction;
     private Map<Direction, BufferedImage>sprites;
-    private long invincibleUntil;
-    private long frozenUntil;
+    private volatile boolean invincible;
+    private volatile boolean frozen;
     private long moveDelay = 150;
     private long nextAllowedMove = 0;
 
@@ -69,25 +69,37 @@ public class Player extends Entity {
 
     
     public boolean isInvincible() {
-        return System.currentTimeMillis() < invincibleUntil;
+        return invincible;
     }
 
     
     public boolean canMove() {
         long now = System.currentTimeMillis();
-        return now >= frozenUntil && now >= nextAllowedMove;
+        return !frozen && now >= nextAllowedMove;
     }
 
     
     public void makeInvincible(long millis) {
-        long now = System.currentTimeMillis();
-        this.invincibleUntil = now + millis;
-        this.frozenUntil = now + millis;
+        invincible = true;
+        frozen = true;
+        new Thread(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {}
+            invincible = false;
+            frozen = false;
+        }).start();
     }
 
     
     public void grantTemporaryInvincibility(long millis) {
-        this.invincibleUntil = System.currentTimeMillis() + millis;
+        invincible = true;
+        new Thread(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {}
+            invincible = false;
+        }).start();
     }
 
     
